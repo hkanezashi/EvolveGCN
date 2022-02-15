@@ -1,5 +1,6 @@
 import logging
 import pprint
+import os
 import sys
 import datetime
 import torch
@@ -15,6 +16,7 @@ class Logger:
         
         if args is not None:
             currdate = str(datetime.datetime.today().strftime('%Y%m%d%H%M%S'))
+            os.makedirs("log", exist_ok=True)
             self.log_name = 'log/log_' + args.data + '_' + args.task + '_' + args.model + '_' + currdate + '_r' + str(
                 args.rank) + '.log'
             
