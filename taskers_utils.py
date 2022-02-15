@@ -111,14 +111,6 @@ def get_node_mask(cur_adj, num_nodes):
 
 def get_static_sp_adj(edges, weighted):
     idx = edges['idx']
-    # subset = idx[:, ECOLS.time] <= time
-    # subset = subset * (idx[:,ECOLS.time] > (time - time_window))
-    
-    # idx = edges['idx'][subset][:,[ECOLS.source, ECOLS.target]]
-    # if weighted:
-    #     vals = edges['vals'][subset]
-    # else:
-    #     vals = torch.ones(idx.size(0), dtype=torch.long)
     vals = torch.ones(idx.size(0), dtype=torch.long)
     
     return {'idx': idx, 'vals': vals}
@@ -164,12 +156,16 @@ def make_sparse_eye(size):
 
 
 def get_all_non_existing_edges(adj, tot_nodes):
+    """Extract non-existing edge information
+    :param adj: Existing edge information
+    :param tot_nodes: Total number of nodes
+    :return: Non-existing edge information
+    """
     true_ids = adj['idx'].t().numpy()
     true_ids = get_edges_ids(true_ids, tot_nodes)
     
-    all_edges_idx = np.arange(tot_nodes)
-    all_edges_idx = np.array(np.meshgrid(all_edges_idx,
-                                         all_edges_idx)).reshape(2, -1)
+    all_nodes_idx = np.arange(tot_nodes)
+    all_edges_idx = np.array(np.meshgrid(all_nodes_idx, all_nodes_idx)).reshape(2, -1)  # All-to-all
     
     all_edges_ids = get_edges_ids(all_edges_idx, tot_nodes)
     
@@ -178,12 +174,11 @@ def get_all_non_existing_edges(adj, tot_nodes):
     
     non_existing_edges_idx = all_edges_idx[:, mask]
     edges = torch.tensor(non_existing_edges_idx).t()
-    vals = torch.zeros(edges.size(0), dtype=torch.long)
+    vals = torch.zeros(edges.size(0), dtype=torch.long)  # labels of non-existing edges -> 0
     return {'idx': edges, 'vals': vals}
 
 
 def get_non_existing_edges(adj, number, tot_nodes, smart_sampling, existing_nodes=None):
-    # print('----------')
     t0 = time.time()
     idx = adj['idx'].t().numpy()
     true_ids = get_edges_ids(idx, tot_nodes)
@@ -243,7 +238,9 @@ def get_non_existing_edges(adj, number, tot_nodes, smart_sampling, existing_node
 
 
 def get_edges_ids(sp_idx, tot_nodes):
-    # print(sp_idx)
-    # print(tot_nodes)
-    # print(sp_idx[0]*tot_nodes)
+    """Get global edge IDs
+    :param sp_idx: Edge index (array of [src, dst])
+    :param tot_nodes: Number of total nodes
+    :return: Global edge IDs
+    """
     return sp_idx[0] * tot_nodes + sp_idx[1]

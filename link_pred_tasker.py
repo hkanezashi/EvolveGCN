@@ -51,15 +51,6 @@ class Link_Pred_Tasker:
         return prepare_node_feats
     
     def build_get_node_feats(self, args, dataset):
-        # if args.use_2_hot_node_feats:
-        #     max_deg_out, max_deg_in = tu.get_max_degs(args, dataset)
-        #     self.feats_per_node = max_deg_out + max_deg_in
-        #
-        #     def get_node_feats(adj):
-        #         return tu.get_2_hot_deg_feats(adj,
-        #                                       max_deg_out,
-        #                                       max_deg_in,
-        #                                       dataset.num_nodes)
         if args.use_1_hot_node_feats:
             max_deg, _ = tu.get_max_degs(args, dataset)
             self.feats_per_node = max_deg
@@ -84,7 +75,8 @@ class Link_Pred_Tasker:
         hist_adj_list = []
         hist_ndFeats_list = []
         hist_mask_list = []
-        existing_nodes = []
+        existing_nodes = []  # All existing node IDs in the period
+        # Gather previous edge information for prediction
         for i in range(idx - self.args.num_hist_steps, idx + 1):
             cur_adj = tu.get_sp_adj(edges=self.data.edges,
                                     base_time=i,
