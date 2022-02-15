@@ -3,7 +3,7 @@ import taskers_utils as tu
 import utils as u
 
 
-class Link_Pred_Tasker():
+class Link_Pred_Tasker:
     """
     Creates a tasker object which computes the required inputs for training on a link prediction
     task. It receives a dataset object which should have two attributes: nodes_feats and edges, this
@@ -51,16 +51,16 @@ class Link_Pred_Tasker():
         return prepare_node_feats
     
     def build_get_node_feats(self, args, dataset):
-        if args.use_2_hot_node_feats:
-            max_deg_out, max_deg_in = tu.get_max_degs(args, dataset)
-            self.feats_per_node = max_deg_out + max_deg_in
-            
-            def get_node_feats(adj):
-                return tu.get_2_hot_deg_feats(adj,
-                                              max_deg_out,
-                                              max_deg_in,
-                                              dataset.num_nodes)
-        elif args.use_1_hot_node_feats:
+        # if args.use_2_hot_node_feats:
+        #     max_deg_out, max_deg_in = tu.get_max_degs(args, dataset)
+        #     self.feats_per_node = max_deg_out + max_deg_in
+        #
+        #     def get_node_feats(adj):
+        #         return tu.get_2_hot_deg_feats(adj,
+        #                                       max_deg_out,
+        #                                       max_deg_in,
+        #                                       dataset.num_nodes)
+        if args.use_1_hot_node_feats:
             max_deg, _ = tu.get_max_degs(args, dataset)
             self.feats_per_node = max_deg
             
@@ -75,13 +75,19 @@ class Link_Pred_Tasker():
         return get_node_feats
     
     def get_sample(self, idx, test, **kwargs):
+        """Extract sample subgraph dataset info
+        :param idx: Time step index
+        :param test: If True, it treats as testing data
+        :param kwargs: Other options from args (all_edges)
+        :return: Dict of time step index, past edge lists, past node features, current edge labels and past node masks
+        """
         hist_adj_list = []
         hist_ndFeats_list = []
         hist_mask_list = []
         existing_nodes = []
         for i in range(idx - self.args.num_hist_steps, idx + 1):
             cur_adj = tu.get_sp_adj(edges=self.data.edges,
-                                    time=i,
+                                    base_time=i,
                                     weighted=True,
                                     time_window=self.args.adj_mat_time_window)
             
@@ -102,9 +108,10 @@ class Link_Pred_Tasker():
         
         # This would be if we were training on all the edges in the time_window
         label_adj = tu.get_sp_adj(edges=self.data.edges,
-                                  time=idx + 1,
+                                  base_time=idx + 1,
                                   weighted=False,
-                                  time_window=self.args.adj_mat_time_window)
+                                  time_window=self.args.adj_mat_time_window)  # should be 1 (predict the next step)
+        
         if test:
             neg_mult = self.args.negative_mult_test
         else:
@@ -113,7 +120,7 @@ class Link_Pred_Tasker():
         if self.args.smart_neg_sampling:
             existing_nodes = torch.cat(existing_nodes)
         
-        if 'all_edges' in kwargs.keys() and kwargs['all_edges'] == True:
+        if 'all_edges' in kwargs.keys() and kwargs['all_edges']:  # link prediction
             non_exisiting_adj = tu.get_all_non_existing_edges(adj=label_adj, tot_nodes=self.data.num_nodes)
         else:
             non_exisiting_adj = tu.get_non_existing_edges(adj=label_adj,

@@ -175,7 +175,7 @@ class Trainer:
             self.classifier_opt.zero_grad()
     
     def prepare_sample(self, sample):
-        """Prepare sampled dataset
+        """Prepare sampled dataset for dynamic labels
         :param sample: Sampled sub-dataset
         :return: Mini-batch dataset with attributes
         """
@@ -203,10 +203,12 @@ class Trainer:
         return sample
     
     def prepare_static_sample(self, sample):
+        """Prepare sampled dataset for static labels
+        :param sample:
+        :return:
+        """
         sample = u.Namespace(sample)
-        
         sample.hist_adj_list = self.hist_adj_list
-        
         sample.hist_ndFeats_list = self.hist_ndFeats_list
         
         label_sp = dict()

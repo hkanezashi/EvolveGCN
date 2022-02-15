@@ -69,7 +69,7 @@ class Node_Cls_Tasker():
         for i in range(idx - self.args.num_hist_steps, idx + 1):
             # all edgess included from the beginning
             cur_adj = tu.get_sp_adj(edges=self.data.edges,
-                                    time=i,
+                                    base_time=i,
                                     weighted=True,
                                     time_window=self.args.adj_mat_time_window)  # changed this to keep only a time window
             

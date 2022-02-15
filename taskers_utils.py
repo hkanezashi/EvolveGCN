@@ -36,7 +36,7 @@ def get_max_degs(args, dataset, all_window=False):
             window = args.adj_mat_time_window
         
         cur_adj = get_sp_adj(edges=dataset.edges,
-                             time=t,
+                             base_time=t,
                              weighted=False,
                              time_window=window)
         # print(window)
@@ -67,10 +67,17 @@ def get_degree_vects(adj, num_nodes):
     return degs_out, degs_in
 
 
-def get_sp_adj(edges, time, weighted, time_window):
+def get_sp_adj(edges, base_time, weighted, time_window):
+    """Extract edges within the specified time window
+    :param edges: Dict of edge data
+    :param base_time: Base timestamp
+    :param weighted: If True, it
+    :param time_window: Time window for pickup
+    :return: Dict of edge index and edge label
+    """
     idx = edges['idx']
-    subset = idx[:, ECOLS.time] <= time
-    subset = subset * (idx[:, ECOLS.time] > (time - time_window))
+    subset = idx[:, ECOLS.time] <= base_time
+    subset = subset * (idx[:, ECOLS.time] > (base_time - time_window))
     idx = edges['idx'][subset][:, [ECOLS.source, ECOLS.target]]
     vals = edges['vals'][subset]
     out = torch.sparse.FloatTensor(idx.t(), vals).coalesce()
@@ -84,9 +91,9 @@ def get_sp_adj(edges, time, weighted, time_window):
     return {'idx': idx, 'vals': vals}
 
 
-def get_edge_labels(edges, time):
+def get_edge_labels(edges, timestamp):
     idx = edges['idx']
-    subset = idx[:, ECOLS.time] == time
+    subset = idx[:, ECOLS.time] == timestamp
     idx = edges['idx'][subset][:, [ECOLS.source, ECOLS.target]]
     vals = edges['idx'][subset][:, ECOLS.label]
     
@@ -104,14 +111,15 @@ def get_node_mask(cur_adj, num_nodes):
 
 def get_static_sp_adj(edges, weighted):
     idx = edges['idx']
-    # subset = idx[:,ECOLS.time] <= time
+    # subset = idx[:, ECOLS.time] <= time
     # subset = subset * (idx[:,ECOLS.time] > (time - time_window))
     
     # idx = edges['idx'][subset][:,[ECOLS.source, ECOLS.target]]
-    if weighted:
-        vals = edges['vals'][subset]
-    else:
-        vals = torch.ones(idx.size(0), dtype=torch.long)
+    # if weighted:
+    #     vals = edges['vals'][subset]
+    # else:
+    #     vals = torch.ones(idx.size(0), dtype=torch.long)
+    vals = torch.ones(idx.size(0), dtype=torch.long)
     
     return {'idx': idx, 'vals': vals}
 

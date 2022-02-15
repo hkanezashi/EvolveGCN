@@ -60,10 +60,10 @@ class Edge_Cls_Tasker():
 		hist_mask_list = []
 
 		for i in range(idx - self.args.num_hist_steps, idx+1):
-			cur_adj = tu.get_sp_adj(edges = self.data.edges, 
-								   time = i,
-								   weighted = True,
-								   time_window = self.args.adj_mat_time_window)
+			cur_adj = tu.get_sp_adj(edges = self.data.edges,
+                                    base_time= i,
+                                    weighted = True,
+                                    time_window = self.args.adj_mat_time_window)
 			node_mask = tu.get_node_mask(cur_adj, self.data.num_nodes)
 			node_feats = self.get_node_feats(cur_adj)
 			cur_adj = tu.normalize_adj(adj = cur_adj, num_nodes = self.data.num_nodes)
@@ -72,8 +72,8 @@ class Edge_Cls_Tasker():
 			hist_ndFeats_list.append(node_feats)
 			hist_mask_list.append(node_mask)
 
-		label_adj = tu.get_edge_labels(edges = self.data.edges, 
-								  	   time = idx)
+		label_adj = tu.get_edge_labels(edges = self.data.edges,
+									   timestamp= idx)
 
 		
 		return {'idx': idx,
