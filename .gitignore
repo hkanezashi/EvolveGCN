@@ -3,3 +3,4 @@ __pycache__
 data/
 !data/sbm_50t_1000n_adj.csv.tar.gz
 log/
+.ipynb_checkpoints
