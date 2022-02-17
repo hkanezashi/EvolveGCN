@@ -20,8 +20,11 @@ Update on elliptic: The box link is no longer valid. Please see the [instruction
 For downloaded data sets please place them in the 'data' folder.
 
 ## Requirements
-  * PyTorch 1.0 or higher
-  * Python 3.6
+  * Python 3.9
+  * PyTorch 1.10
+  * [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html)
+  * [PyTorch Geometric Temporal](https://pytorch-geometric-temporal.readthedocs.io/en/latest/notes/installation.html)
+  * See `requirements.txt` for other Python packages
 
 ## Set up with Docker
 
